@@ -5,4 +5,8 @@ logs
 .env
 
 # ignore venv
+<<<<<<< HEAD
 venv
+=======
+venv
+>>>>>>> b9c196ae21cfbec5532f9153cdad8676051d4cc5
