@@ -1,0 +1,9 @@
+# ignore all logs
+logs
+
+# ignore .env file
+.env
+
+# ignore venv
+venv
+
