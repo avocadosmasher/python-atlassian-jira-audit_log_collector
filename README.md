@@ -1,6 +1,6 @@
 # 설치 및 실행 방법 요약
 - Python 3.9+ 설치
-- 프로젝트 폴더 생성, 위 파일들(.env, collector.py, requirements.txt) 복사
+- 프로젝트 폴더 생성, 위 파일들(.env, collect-audit.py, requirements.txt) 복사
 - 가상환경 생성 및 활성화
 ```
 python -m venv venv
@@ -17,5 +17,6 @@ pip install -r requirements.txt
 python collect-audit.py
 ```
 
-# Rate limit 관련 문서에 Retry-After 가 header로 값이 넘어온다고 기술되어 있음
-- https://developer.atlassian.com/cloud/jira/platform/rate-limiting/#rate-limit-detection
+# 관련 Atlassian 공식 문서들
+- REST API : https://developer.atlassian.com/cloud/admin/organization/rest/api-group-events/#api-v1-orgs-orgid-events-stream-get
+- Rate limit : https://developer.atlassian.com/cloud/jira/platform/rate-limiting/#rate-limit-detection
