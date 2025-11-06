@@ -9,8 +9,6 @@
 - .env 파일에 ORG_ID, API_TOKEN 등 값 채움
 - 수동 실행으로 동작 확인
 - python collect-audit.py 실행
-- logs/YYYY-MM-DD.log 에 결과, logs/collector.log 에 동작 로그, collector-meta.log/collector-error.log 확인
-- 
 
 # Rate limit 관련 문서에 Retry-After 가 header로 값이 넘어온다고 기술되어 있음
 - https://developer.atlassian.com/cloud/jira/platform/rate-limiting/#rate-limit-detection

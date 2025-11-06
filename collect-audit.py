@@ -107,7 +107,7 @@ def ask_log_info():
     사용자에게 로그 파일명과 날짜 범위를 입력받는 팝업 창 생성\n
     - 반환: {"filename": str, "date_from": str, "date_to": str} \n
     - 날짜 형식은 "YYYY-MM-DD"
-    >> 잘못된 입력 시 오류 메시지 표시 후 재입력 요구
+    >>> 잘못된 입력 시 오류 메시지 표시 후 재입력 요구
     """
     result = {}
     KST = timezone(timedelta(hours=9))  # 한국 표준시 UTC+9
