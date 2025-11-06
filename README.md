@@ -13,7 +13,9 @@ pip install -r requirements.txt
 ```
 - .env 파일에 ORG_ID, API_TOKEN 등 값 채움
 - 수동 실행으로 동작 확인
-- python collect-audit.py 실행
+```
+python collect-audit.py
+```
 
 # Rate limit 관련 문서에 Retry-After 가 header로 값이 넘어온다고 기술되어 있음
 - https://developer.atlassian.com/cloud/jira/platform/rate-limiting/#rate-limit-detection
