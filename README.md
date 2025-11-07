@@ -17,6 +17,11 @@ pip install -r requirements.txt
 python collect-audit.py
 ```
 
+- Calendar 기능을 사용하기 위해 tkcalendar를 인스톨
+```
+pip install tkcalendar
+```
+
 # 관련 Atlassian 공식 문서들
 - REST API : https://developer.atlassian.com/cloud/admin/organization/rest/api-group-events/#api-v1-orgs-orgid-events-stream-get
 - Rate limit : https://developer.atlassian.com/cloud/jira/platform/rate-limiting/#rate-limit-detection
