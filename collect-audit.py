@@ -6,11 +6,12 @@ import csv
 import requests
 import threading
 import queue
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
+from tkcalendar import DateEntry
 from dotenv import load_dotenv
 
 # .env 파일 로드
@@ -184,13 +185,25 @@ class CollectorUI:
         self.filename_entry = tk.Entry(in_frame, width=30)
         self.filename_entry.grid(row=0, column=1, padx=6, sticky="w")
 
-        tk.Label(in_frame, text="시작 날짜 (YYYY-MM-DD)").grid(row=1, column=0, sticky="w")
-        self.date_from_entry = tk.Entry(in_frame, width=20)
-        self.date_from_entry.grid(row=1, column=1, padx=6, sticky="w")
+        today = date.today()
 
-        tk.Label(in_frame, text="종료 날짜 (YYYY-MM-DD)").grid(row=2, column=0, sticky="w")
-        self.date_to_entry = tk.Entry(in_frame, width=20)
-        self.date_to_entry.grid(row=2, column=1, padx=6, sticky="w")
+        tk.Label(in_frame, text="시작 날짜").grid(row=1, column=0, sticky="w")
+        self.cal_from = DateEntry(in_frame, width=12, background='darkblue', foreground='white',
+                             borderwidth=2,
+                             year=today.year,
+                             month=today.month,
+                             day=today.day,
+                             date_pattern="yyyy-mm-dd")
+        self.cal_from.grid(row=1, column=1, padx=6, sticky="w")
+
+        tk.Label(in_frame, text="종료 날짜").grid(row=2, column=0, sticky="w")
+        self.cal_to = DateEntry(in_frame, width=12, background='darkblue', foreground='white',
+                             borderwidth=2,
+                             year=today.year,
+                             month=today.month,
+                             day=today.day,
+                             date_pattern="yyyy-mm-dd")
+        self.cal_to.grid(row=2, column=1, padx=6, sticky="w")
 
         self.start_btn = tk.Button(in_frame, text="확인", command=self.on_start)
         self.start_btn.grid(row=0, column=2, rowspan=1, padx=10)
@@ -259,19 +272,21 @@ class CollectorUI:
         self.log_text.see("end")
         self.log_text.configure(state="disabled")
 
-    def validate_dates(self, dfrom: str, dto: str):
+    def validate_dates(self, dfrom: str, dto: str, tz: timezone = timedelta(hours=9)):
         """
-        날짜가 유효한 형태인지 검사하고 유효한 경우 밀리초(Atlassian Jira Cloud가 epoch 밀리초 단위를 사용하기 때문) 타임스탬프로 변환하여 반환.\n
+        날짜 형식이 유효한지 검사하고 유효한 경우 밀리초(Atlassian Jira Cloud가 epoch 밀리초 단위를 사용하기 때문) 타임스탬프로 변환하여 반환.\n
+        - Default로 KST (UTC+9) 타임존으로 변환함.\n
         - 성공 반환 값: (from_timestamp_ms, to_timestamp_ms)
         - 실패 시 반환 값 : (None, None) (유효하지 않은 경우)\n
         09:00 KST 기준으로 날짜의 시작과 끝을 설정함.
         """
-        KST = timezone(timedelta(hours=9))
+        
         try:
             dt_from = datetime.strptime(dfrom, "%Y-%m-%d")
             dt_to = datetime.strptime(dto, "%Y-%m-%d")
-            dt_from = dt_from.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=KST)
-            dt_to = dt_to.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=KST)
+            dt_from = dt_from.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tz)
+            dt_to = dt_to.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=tz)
+            
             return int(dt_from.timestamp() * 1000), int(dt_to.timestamp() * 1000)
         except ValueError:
             return None, None
@@ -282,20 +297,26 @@ class CollectorUI:
         입력값 검증 후 UI 상태 변경 및 백그라운드 스레드 시작
         """
         filename = self.filename_entry.get().strip().removesuffix(".log")
-        date_from_str = self.date_from_entry.get().strip()
-        date_to_str = self.date_to_entry.get().strip()
-
+        date_from_str = self.cal_from.get_date().strftime("%Y-%m-%d").strip()
+        date_to_str = self.cal_to.get_date().strftime("%Y-%m-%d").strip()
+        KST = timezone(timedelta(hours=9))
+        tomorrow = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        tomorrow_ts = int(tomorrow.timestamp() * 1000)
+        
         # 입력값이 체워져 있는지 검사
         if not filename or not date_from_str or not date_to_str:
             messagebox.showerror("입력 오류", "모든 항목을 입력해주세요.")
             return
         
         # 입력값 검증
-        date_from, date_to = self.validate_dates(date_from_str, date_to_str)
+        date_from, date_to = self.validate_dates(date_from_str, date_to_str, tz = KST)
 
-        # 날짜 형식이 올바른지 검사
         if not date_from or not date_to:
             messagebox.showerror("날짜 형식 오류", "날짜는 YYYY-MM-DD 형식으로 입력해주세요.")
+            return
+        
+        if date_from > date_to or date_from >= tomorrow_ts or date_to >= tomorrow_ts:
+            messagebox.showerror("날짜 범위 오류", "날짜 범위가 올바르지 않습니다.")
             return
 
         # UI 상태 변경
